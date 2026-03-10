@@ -1,0 +1,65 @@
+# =================================================
+# Core Web Framework
+# =================================================
+fastapi==0.110.0
+uvicorn[standard]==0.27.1
+starlette==0.36.3
+
+# =================================================
+# File Uploads / Forms / Streaming
+# =================================================
+python-multipart==0.0.9
+
+# =================================================
+# Image Processing (TIFF / PNG / JPG)
+# =================================================
+Pillow==10.2.0
+opencv-python==4.9.0.80      # 🔥 layout, bold/italic detection support
+numpy==1.26.4
+
+# =================================================
+# OCR Engine
+# =================================================
+pytesseract==0.3.10
+
+# NOTE:
+# Tesseract OCR binary MUST be installed on system
+# Ubuntu: sudo apt install tesseract-ocr
+# Windows: https://github.com/UB-Mannheim/tesseract/wiki
+
+# =================================================
+# PDF Processing
+# =================================================
+pdf2image==1.17.0
+pypdf==4.1.0
+poppler-utils==0.1.0         # ⚠ Linux only (system dependency)
+
+# =================================================
+# XML / HTML / Entity Handling
+# =================================================
+lxml==5.1.0
+beautifulsoup4==4.12.3      # 🔥 entities.html parsing
+defusedxml==0.7.1           # 🔒 secure XML parsing
+
+# =================================================
+# DOCX / Word (OCR Output / Debug)
+# =================================================
+python-docx==1.1.0
+
+# =================================================
+# Text Processing & NLP (lightweight)
+# =================================================
+regex==2023.12.25            # advanced pattern matching
+python-dateutil==2.9.0.post0
+
+# =================================================
+# Background Tasks / Stability
+# =================================================
+anyio==4.3.0
+typing-extensions==4.11.0
+
+# =================================================
+# Optional (Recommended for XML accuracy)
+# =================================================
+rapidfuzz==3.6.2             # fuzzy matching (footnotes refs)
+html5lib==1.1                 # alternative HTML parser for BS4
