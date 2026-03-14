@@ -33,6 +33,9 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     requested_role: Optional[str] = None
 
+class PlanRequest(BaseModel):
+    plan_type: int  # 1, 6, or 12 months
+
 class Token(BaseModel):
     access_token: str
     token_type: str

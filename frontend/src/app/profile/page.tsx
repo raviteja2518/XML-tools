@@ -38,15 +38,8 @@ const ProfilePage = () => {
     }
   };
 
-  const handleUpgrade = async () => {
-    try {
-      const response = await api.post("/payment/upgrade");
-      updateUser(response.data);
-      alert("Successfully upgraded to Subscriber!");
-    } catch (error) {
-      console.error("Upgrade failed:", error);
-      alert("Failed to upgrade subscription.");
-    }
+  const handleUpgrade = () => {
+    router.push("/payment");
   };
 
   if (!user) return null;
