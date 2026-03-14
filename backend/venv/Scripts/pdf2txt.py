@@ -1,4 +1,4 @@
-#!E:\BlackVave\XML_TOOLS\backend\venv\Scripts\python.exe
+#!E:\mypro\XML-Tool\backend\venv\Scripts\python.exe
 """A command line tool for extracting text and images from PDF and
 output it to plain text, html, xml or tags.
 """

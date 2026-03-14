@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -33,9 +34,11 @@ export default function CasePdfToXmlPage() {
   setStep(2);
 
   try {
+    const token = Cookies.get('token');
     const res = await axios.post(
       'http://localhost:8000/api/case-reference/upload',
-      fd
+      fd,
+      { headers: { 'Authorization': `Bearer ${token}` } }
     );
 
     setJobId(res.data.job_id);
@@ -54,15 +57,16 @@ export default function CasePdfToXmlPage() {
 };
 
 
-  /* ================= UPDATE XML ================= */
   const updateXml = async () => {
     try {
+      const token = Cookies.get('token');
       await axios.post(
         'http://localhost:8000/api/case-reference/update',
         {
           job_id: jobId,
           xml: xmlContent,
-        }
+        },
+        { headers: { 'Authorization': `Bearer ${token}` } }
       );
       setStep(4);
     } catch {
@@ -73,9 +77,13 @@ export default function CasePdfToXmlPage() {
   /* ================= DOWNLOAD ================= */
   const downloadXml = async () => {
     try {
+      const token = Cookies.get('token');
       const res = await axios.get(
         `http://localhost:8000/api/case-reference/download?job_id=${jobId}`,
-        { responseType: 'blob' }
+        { 
+          responseType: 'blob',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
       );
 
       const blob = new Blob([res.data], { type: 'application/xml' });

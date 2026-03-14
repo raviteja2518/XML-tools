@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Cookies from 'js-cookie';
 
 export default function PdfSplitPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -33,8 +34,12 @@ export default function PdfSplitPage() {
       formData.append('file', file);
       formData.append('ranges', ranges);
 
+      const token = Cookies.get('token');
       const res = await fetch('http://127.0.0.1:8000/pdf-split', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
 

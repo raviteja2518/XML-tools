@@ -1,65 +1,137 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
-from fastapi.responses import FileResponse
-from pdf2image import convert_from_path
-import pytesseract
-from docx import Document
-from docx.shared import Inches
-import os, uuid, time
+from fastapi.responses import FileResponse, StreamingResponse
+from pdf2docx import Converter
+import uuid, os, threading, time, asyncio, json
 
 router = APIRouter()
 
-UPLOAD_DIR = "uploads"
-OUTPUT_DIR = "outputs"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CONVERT_DIR = os.path.join(BASE_DIR, "storage", "pdf_word")
 
-# ================= IMAGE TO EDITABLE WORD LOGIC =================
-def pdf_to_images_to_word(pdf_path, docx_path):
-    # 1. PDF ni High Quality Images (DPI 300) ga marusthunnam
-    images = convert_from_path(pdf_path, dpi=300)
-    
-    word_doc = Document()
-    
-    for i, image in enumerate(images):
-        # 2. TIFF/PNG ga temporary ga save chesthunnam
-        temp_img_path = f"temp_page_{i}.png"
-        image.save(temp_img_path, "PNG")
-        
-        # 3. OCR Analysis - Ikkada Text and Layout ni identify chestundi
-        # 'hocr' or 'data' use chesi location kuda track cheyochu, but simple text focus chesthunnam
-        text = pytesseract.image_to_string(image)
-        
-        # 4. Word loki Editable Text ni add chesthunnam
-        paragraph = word_doc.add_paragraph(text)
-        
-        # Optional: Mee request prakaram images kuda undali ante:
-        # word_doc.add_picture(temp_img_path, width=Inches(6))
-        
-        word_doc.add_page_break()
-        
-        # Temporary image delete
-        if os.path.exists(temp_img_path):
-            os.remove(temp_img_path)
+os.makedirs(CONVERT_DIR, exist_ok=True)
 
-    word_doc.save(docx_path)
+TTL_SECONDS = 1800
 
-# ================= API ENDPOINT =================
-@router.post("/pdf-to-word-ocr")
-async def pdf_to_word(file: UploadFile = File(...)):
-    if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(400, "Only PDF files allowed")
 
-    file_id = str(uuid.uuid4())
-    pdf_path = os.path.join(UPLOAD_DIR, f"{file_id}.pdf")
-    docx_path = os.path.join(OUTPUT_DIR, f"{file_id}.docx")
+progress_store = {}
+job_status = {}
+job_created_at = {}
 
-    with open(pdf_path, "wb") as f:
-        f.write(await file.read())
+
+def convert_worker(job_id: str, pdf_path: str):
 
     try:
-        # Ikkada image logic run avthundi
-        pdf_to_images_to_word(pdf_path, docx_path)
-    except Exception as e:
-        raise HTTPException(500, f"OCR Conversion failed: {str(e)}")
 
-    return {"status": "success", "download_id": file_id}
+        progress_store[job_id] = 10
+
+        output_path = os.path.join(CONVERT_DIR, f"{job_id}.docx")
+
+        cv = Converter(pdf_path)
+
+        cv.convert(output_path)
+
+        cv.close()
+
+        progress_store[job_id] = 100
+
+        job_status[job_id] = "completed"
+
+        os.remove(pdf_path)
+
+    except Exception as e:
+
+        print("ERROR:", e)
+
+        job_status[job_id] = "failed"
+
+
+@router.post("/tools/pdf-to-word")
+async def upload_pdf(file: UploadFile = File(...)):
+
+    if not file.filename.endswith(".pdf"):
+        raise HTTPException(400, "Only PDF allowed")
+
+    job_id = str(uuid.uuid4())
+
+    pdf_path = os.path.join(CONVERT_DIR, f"{job_id}.pdf")
+
+    with open(pdf_path,"wb") as f:
+        f.write(await file.read())
+
+    progress_store[job_id] = 1
+    job_status[job_id] = "processing"
+    job_created_at[job_id] = time.time()
+
+    threading.Thread(
+        target=convert_worker,
+        args=(job_id,pdf_path),
+        daemon=True
+    ).start()
+
+    return {
+        "job_id": job_id,
+        "download_url": f"/tools/download/{job_id}"
+    }
+
+
+@router.get("/events/pdf-to-word-progress/{job_id}")
+async def progress_events(job_id: str):
+
+    async def event_generator():
+
+        last = -1
+
+        while True:
+
+            progress = progress_store.get(job_id,0)
+
+            if progress != last:
+
+                yield f"data: {json.dumps({'progress':progress})}\n\n"
+
+                last = progress
+
+            if progress >= 100:
+                break
+
+            await asyncio.sleep(0.5)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream"
+    )
+
+
+@router.get("/tools/download/{job_id}")
+def download(job_id:str, background_tasks: BackgroundTasks):
+
+    file_path = os.path.join(CONVERT_DIR, f"{job_id}.docx")
+
+    if not os.path.exists(file_path):
+        raise HTTPException(404,"File not found")
+
+    background_tasks.add_task(cleanup,job_id)
+
+    return FileResponse(
+        file_path,
+        filename="converted.docx",
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
+
+def cleanup(job_id):
+
+    time.sleep(2)
+
+    files = [
+        os.path.join(CONVERT_DIR,f"{job_id}.docx"),
+        os.path.join(CONVERT_DIR,f"{job_id}.pdf")
+    ]
+
+    for f in files:
+        if os.path.exists(f):
+            os.remove(f)
+
+    progress_store.pop(job_id,None)
+    job_status.pop(job_id,None)
+    job_created_at.pop(job_id,None)

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Cookies from 'js-cookie';
 
 export default function PdfToWordPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -23,8 +24,12 @@ export default function PdfToWordPage() {
       const formData = new FormData();
       formData.append('file', file);
 
+      const token = Cookies.get('token');
       const res = await fetch('http://127.0.0.1:8000/pdf-to-word', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formData,
       });
 

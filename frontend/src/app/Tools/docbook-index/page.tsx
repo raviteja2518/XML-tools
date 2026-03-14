@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 type Step = 1 | 2 | 3;
 
@@ -43,7 +44,10 @@ export default function BlackVaveIndexTool() {
     files.forEach(f => fd.append('files', f));
 
     try {
-      const res = await axios.post('http://localhost:8000/api/docxmlindex/upload-pages', fd);
+      const token = Cookies.get('token');
+      const res = await axios.post('http://localhost:8000/api/docxmlindex/upload-pages', fd, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setJobId(res.data.job_id);
       setPages(res.data.pages);
       setStep(2);
@@ -85,6 +89,7 @@ export default function BlackVaveIndexTool() {
     
     setIsSaving(true);
     try {
+      const token = Cookies.get('token');
       await axios.post('http://localhost:8000/api/docxmlindex/save-selection', {
         job_id: jobId,
         file: pages[currentPage].file,
@@ -92,6 +97,8 @@ export default function BlackVaveIndexTool() {
         y: Math.round(rect.y),
         width: Math.round(rect.w),
         height: Math.round(rect.h),
+      }, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       alert(`Column saved for Page ${currentPage + 1}! Select next column or click Generate.`);
       setRect({ x: 0, y: 0, w: 0, h: 0 });
@@ -105,7 +112,10 @@ export default function BlackVaveIndexTool() {
   // 4. GENERATE
   const generateXML = async () => {
     try {
-      await axios.post(`http://localhost:8000/api/docxmlindex/generate-xml?job_id=${jobId}`);
+      const token = Cookies.get('token');
+      await axios.post(`http://localhost:8000/api/docxmlindex/generate-xml?job_id=${jobId}`, {}, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       window.location.href = `http://localhost:8000/api/docxmlindex/download?job_id=${jobId}`;
     } catch (err) {
       alert("XML generation failed.");

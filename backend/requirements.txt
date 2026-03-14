@@ -63,3 +63,13 @@ typing-extensions==4.11.0
 # =================================================
 rapidfuzz==3.6.2             # fuzzy matching (footnotes refs)
 html5lib==1.1                 # alternative HTML parser for BS4
+
+# =================================================
+# Authentication & Database
+# =================================================
+SQLAlchemy>=2.0.28
+PyJWT>=2.8.0
+bcrypt>=4.1.2
+email-validator>=2.1.1
+psycopg2-binary>=2.9.9
+python-dotenv>=1.0.1

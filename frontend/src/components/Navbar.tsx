@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { user, logout, loading } = useAuth();
 
   // ✅ Client-only width check (hydration safe)
   useEffect(() => {
@@ -27,14 +29,31 @@ export default function Navbar() {
             </ul>
 
             <div style={styles.mobileActions}>
-  <Link href="/login">
-    <button style={styles.login}>Login</button>
-  </Link>
-
-  <Link href="/">
-    <button style={styles.dashboard}>Dashboard</button>
-  </Link>
-</div>
+              {!loading && (
+                <>
+                  {!user ? (
+                    <Link href="/login">
+                      <button style={styles.login}>Login</button>
+                    </Link>
+                  ) : (
+                    <>
+                      {user.role === 'admin' && (
+                        <Link href="/admin">
+                          <button style={styles.dashboard}>Admin Panel</button>
+                        </Link>
+                      )}
+                      
+                      <button style={styles.login} onClick={logout}>
+                        Logout ({user.name})
+                      </button>
+                    </>
+                  )}
+                  <Link href="/">
+                    <button style={styles.dashboard}>Hub</button>
+                  </Link>
+                </>
+              )}
+            </div>
 
           </>
         )}
@@ -53,14 +72,30 @@ export default function Navbar() {
           </ul>
 
           <div style={styles.mobileActions}>
-  <Link href="/login">
-    <button style={styles.login}>Login</button>
-  </Link>
-
-  <Link href="/">
-    <button style={styles.dashboard}>Dashboard</button>
-  </Link>
-</div>
+            {!loading && (
+              <>
+                {!user ? (
+                  <Link href="/login">
+                    <button style={styles.login} onClick={() => setOpen(false)}>Login</button>
+                  </Link>
+                ) : (
+                  <>
+                    {user.role === 'admin' && (
+                      <Link href="/admin">
+                        <button style={styles.dashboard} onClick={() => setOpen(false)}>Admin Panel</button>
+                      </Link>
+                    )}
+                    <button style={styles.login} onClick={() => { logout(); setOpen(false); }}>
+                      Logout ({user.name})
+                    </button>
+                  </>
+                )}
+                <Link href="/">
+                  <button style={styles.dashboard} onClick={() => setOpen(false)}>Hub</button>
+                </Link>
+              </>
+            )}
+          </div>
 
         </div>
       )}
@@ -73,7 +108,6 @@ function NavLinks({ onClick }: { onClick?: () => void }) {
   return (
     <>
       <li><Link href="/pdf-to-xml" onClick={onClick}>PDF → XML</Link></li>
-      <li><Link href="/pdf-to-word" onClick={onClick}>PDF → Word</Link></li>
       <li><Link href="/ocr" onClick={onClick}>OCR</Link></li>
       <li><Link href="/pdf-to-tiff" onClick={onClick}>PDF → TIFF</Link></li>
       <li><Link href="/pdf-split" onClick={onClick}>PDF Split</Link></li>

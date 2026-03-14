@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef } from 'react';
+import Cookies from 'js-cookie';
 
 /* ================= TAG DEFINITIONS ================= */
 
@@ -182,8 +183,10 @@ export default function LnXmlEditor() {
     const fd = new FormData();
     fd.append('file', file);
 
+    const token = Cookies.get('token');
     const res = await fetch('http://127.0.0.1:8000/lnxml/upload', {
       method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}` },
       body: fd,
     });
 
@@ -228,9 +231,13 @@ export default function LnXmlEditor() {
     setPages(copy);
 
     /* optional backend save */
+    const token = Cookies.get('token');
     await fetch('http://127.0.0.1:8000/lnxml/tag', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({
         job_id: jobId,
         page: pageIndex + 1,
@@ -265,9 +272,13 @@ export default function LnXmlEditor() {
   /* ================= GENERATE ================= */
 
  const generate = async () => {
+  const token = Cookies.get('token');
   const res = await fetch('http://127.0.0.1:8000/lnxml/generate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify({ job_id: jobId }),
   });
 

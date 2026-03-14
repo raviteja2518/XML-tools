@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import Cookies from 'js-cookie';
 
 /* ================= CONFIG ================= */
 
@@ -305,7 +306,12 @@ export default function LnXmlEditor() {
     const fd = new FormData();
     fd.append('file', file);
 
-    const res = await fetch(`${API_BASE}/lnxml/upload`, { method: 'POST', body: fd });
+    const token = Cookies.get('token');
+    const res = await fetch(`${API_BASE}/lnxml/upload`, { 
+      method: 'POST', 
+      headers: { 'Authorization': `Bearer ${token}` },
+      body: fd 
+    });
     const data = await res.json();
 
     setJobId(data.job_id);
@@ -340,9 +346,13 @@ export default function LnXmlEditor() {
     setPages(copy);
 
     // 🔥 SAVE TO BACKEND
+    const token = Cookies.get('token');
     await fetch(`${API_BASE}/lnxml/tag`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({
         job_id: jobId,
         page: pageIndex + 1,
@@ -355,12 +365,14 @@ export default function LnXmlEditor() {
     });
   };
 
-  /* ================= GENERATE ================= */
-
 const generate = async () => {
+  const token = Cookies.get('token');
   const res = await fetch(`${API_BASE}/lnxml/generate`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
     body: JSON.stringify({ job_id: jobId }),
   });
 

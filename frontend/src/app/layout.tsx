@@ -1,5 +1,7 @@
 import Navbar from '@/components/Navbar';
 import './globals.css';
+import { AuthProvider } from '@/context/AuthContext';
+import './globals.css';
 
 export const metadata = {
   title: 'XML Tools',
@@ -14,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar />
-        {children}
+        <AuthProvider>
+          <Navbar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

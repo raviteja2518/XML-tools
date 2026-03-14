@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Cookies from 'js-cookie';
 
 export default function OCRPage() {
   const [files, setFiles] = useState<File[]>([]);
@@ -20,8 +21,12 @@ export default function OCRPage() {
     const fd = new FormData();
     files.forEach(f => fd.append('files', f));
 
+    const token = Cookies.get('token');
     const res = await fetch('http://127.0.0.1:8000/ocr/process', {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
       body: fd,
     });
 
