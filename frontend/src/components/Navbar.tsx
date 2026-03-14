@@ -29,7 +29,7 @@ export default function Navbar() {
               <NavLinks />
             </ul>
 
-            <div style={styles.mobileActions}>
+            <div style={styles.actions}>
               {!loading && (
                 <>
                   {!user ? (
@@ -43,6 +43,23 @@ export default function Navbar() {
                           <button style={styles.dashboard}>Admin Panel</button>
                         </Link>
                       )}
+
+                      {/* Profile Link */}
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-medium hover:bg-white/10 transition-all text-gray-300 hover:text-white"
+                      >
+                        {user?.profile_picture ? (
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "")}${user.profile_picture}`}
+                            alt="P"
+                            className="w-4 h-4 rounded-full object-cover shadow-sm"
+                          />
+                        ) : (
+                          <User className="w-3.5 h-3.5" />
+                        )}
+                        Profile
+                      </Link>
                       
                       <button style={styles.login} onClick={logout}>
                         Logout ({user.name})
