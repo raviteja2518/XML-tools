@@ -13,4 +13,6 @@ class User(Base):
     role = Column(String, default="pending")  # pending, employee, subscriber, admin
     requested_role = Column(String, default="employee") # what the user chose during registration
     has_paid = Column(Integer, default=0) # SQLite boolean equivalent
+    profile_picture = Column(String, nullable=True)
+    subscription_expiry = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

@@ -48,9 +48,6 @@ export default function Navbar() {
                       </button>
                     </>
                   )}
-                  <Link href="/">
-                    <button style={styles.dashboard}>Hub</button>
-                  </Link>
                 </>
               )}
             </div>
@@ -85,14 +82,33 @@ export default function Navbar() {
                         <button style={styles.dashboard} onClick={() => setOpen(false)}>Admin Panel</button>
                       </Link>
                     )}
+                    <Link href="/">
+                      <button style={styles.dashboard} onClick={() => setOpen(false)}>Hub</button>
+                    </Link>
+
+                    {/* Profile Link */}
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium hover:bg-white/10 transition-all text-gray-300 hover:text-white"
+                      onClick={() => setOpen(false)}
+                    >
+                      {user?.profile_picture ? (
+                        <img
+                          src={`${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "")}${user.profile_picture}`}
+                          alt="P"
+                          className="w-5 h-5 rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
+                      Profile
+                    </Link>
+
                     <button style={styles.login} onClick={() => { logout(); setOpen(false); }}>
                       Logout ({user.name})
                     </button>
                   </>
                 )}
-                <Link href="/">
-                  <button style={styles.dashboard} onClick={() => setOpen(false)}>Hub</button>
-                </Link>
               </>
             )}
           </div>

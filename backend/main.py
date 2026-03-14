@@ -106,6 +106,8 @@ os.makedirs("temp_jobs", exist_ok=True)
 
 app.mount("/outputs", StaticFiles(directory="outputs"), name="outputs")
 app.mount("/temp_jobs", StaticFiles(directory="temp_jobs"), name="temp_jobs")
+os.makedirs("uploads/profile_pictures", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # ================= IMPORT ROUTERS =================
 
@@ -136,6 +138,7 @@ from routes.pdf_to_word import router as pdf_word_router
 from routes.auth_routes import router as auth_router
 from routes.admin_routes import router as admin_router
 from routes.payment_routes import router as payment_router
+from routes.profile_routes import router as profile_router
 from dependencies import get_current_active_user
 from fastapi import Depends
 
@@ -144,6 +147,7 @@ from fastapi import Depends
 app.include_router(auth_router)
 app.include_router(admin_router)
 app.include_router(payment_router)
+app.include_router(profile_router)
 
 # Protect existing tools using dependencies
 tool_deps = [Depends(get_current_active_user)]

@@ -21,10 +21,17 @@ class UserResponse(BaseModel):
     role: str
     requested_role: str
     has_paid: int
+    profile_picture: Optional[str] = None
+    subscription_expiry: Optional[datetime] = None
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    requested_role: Optional[str] = None
 
 class Token(BaseModel):
     access_token: str

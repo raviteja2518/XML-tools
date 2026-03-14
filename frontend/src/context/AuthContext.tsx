@@ -11,12 +11,16 @@ export interface User {
   role: string;
   requested_role: string;
   has_paid: number;
+  profile_picture?: string;
+  subscription_expiry?: string;
+  created_at: string;
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
   login: (token: string, user: User) => void;
+  updateUser: (newUser: User) => void;
   logout: () => void;
   loading: boolean;
 }
@@ -25,6 +29,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   token: null,
   login: () => {},
+  updateUser: () => {},
   logout: () => {},
   loading: true,
 });
@@ -64,6 +69,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(newUser);
   };
 
+  const updateUser = (newUser: User) => {
+    localStorage.setItem('user', JSON.stringify(newUser));
+    setUser(newUser);
+  };
+
   const logout = () => {
     Cookies.remove('token');
     localStorage.removeItem('user');
@@ -73,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, token, login, updateUser, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

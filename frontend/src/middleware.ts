@@ -5,17 +5,23 @@ const publicPaths = ['/login', '/register'];
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
-  const isPublicPath = publicPaths.includes(request.nextUrl.pathname);
+  const { pathname } = request.nextUrl;
 
-  // If the user is trying to access a public path like /login or /register while logged in,
+  const protectedRoutes = ['/admin', '/pdf-to-xml', '/ocr-docbook', '/profile'];
+  const authRoutes = ['/login', '/register'];
+
+  const isAuthRoute = authRoutes.includes(pathname);
+  const isProtectedRoute = protectedRoutes.includes(pathname);
+
+  // If the user is trying to access an auth route (login/register) while logged in,
   // redirect them to the home page.
-  if (isPublicPath && token) {
+  if (isAuthRoute && token) {
     return NextResponse.redirect(new URL('/', request.url));
   }
 
   // If the user is trying to access a protected route without a token,
   // redirect them to the /login page.
-  if (!isPublicPath && !token) {
+  if (isProtectedRoute && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 
