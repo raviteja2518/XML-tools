@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import api from "@/utils/api";
 import { Loader2, ShieldCheck, Zap, CheckCircle2 } from "lucide-react";
-import Navbar from "@/components/Navbar";
 
 const plans = [
   {
@@ -85,8 +84,6 @@ export default function PaymentPage() {
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-indigo-500/30">
-      <Navbar />
-
       <main className="max-w-6xl mx-auto px-6 py-16">
         <div className="text-center mb-16 space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-white to-white/40 bg-clip-text text-transparent">

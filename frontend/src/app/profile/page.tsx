@@ -50,8 +50,6 @@ const ProfilePage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-indigo-500/30">
-      <Navbar />
-      
       <main className="max-w-4xl mx-auto px-6 py-12">
         <div className="space-y-8">
           {/* Header */}
