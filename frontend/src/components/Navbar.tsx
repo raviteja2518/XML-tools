@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { User } from 'lucide-react';
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
