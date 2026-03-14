@@ -1,8 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import api from '@/utils/api';
 
 type Step = 1 | 2 | 3 | 4 | 5;
 
@@ -24,50 +22,40 @@ export default function CasePdfToXmlPage() {
   };
 
   /* ================= UPLOAD ================= */
- const uploadFile = async () => {
-  if (!file) return alert('Please upload PDF or Word file');
+  const uploadFile = async () => {
+    if (!file) return alert('Please upload PDF or Word file');
 
-  const fd = new FormData();
-  fd.append('file', file);
+    const fd = new FormData();
+    fd.append('file', file);
 
-  setLoading(true);
-  setStep(2);
+    setLoading(true);
+    setStep(2);
 
-  try {
-    const token = Cookies.get('token');
-    const res = await axios.post(
-      'http://localhost:8000/api/case-reference/upload',
-      fd,
-      { headers: { 'Authorization': `Bearer ${token}` } }
-    );
+    try {
+      const res = await api.post('/case-reference/upload', fd);
 
-    setJobId(res.data.job_id);
-    setXmlContent(res.data.preview_xml);
-    setLoading(false);
-    setStep(3);
-  } catch (err: any) {
-    setLoading(false);
-    setStep(1);
+      setJobId(res.data.job_id);
+      setXmlContent(res.data.preview_xml);
+      setLoading(false);
+      setStep(3);
+    } catch (err: any) {
+      setLoading(false);
+      setStep(1);
 
-    const msg =
-      err?.response?.data?.detail ||
-      'Processing failed (check backend logs)';
-    alert(msg);
-  }
-};
+      const msg =
+        err?.response?.data?.detail ||
+        'Processing failed (check backend logs)';
+      alert(msg);
+    }
+  };
 
 
   const updateXml = async () => {
     try {
-      const token = Cookies.get('token');
-      await axios.post(
-        'http://localhost:8000/api/case-reference/update',
-        {
-          job_id: jobId,
-          xml: xmlContent,
-        },
-        { headers: { 'Authorization': `Bearer ${token}` } }
-      );
+      await api.post('/case-reference/update', {
+        job_id: jobId,
+        xml: xmlContent,
+      });
       setStep(4);
     } catch {
       alert('Update failed');
@@ -77,14 +65,9 @@ export default function CasePdfToXmlPage() {
   /* ================= DOWNLOAD ================= */
   const downloadXml = async () => {
     try {
-      const token = Cookies.get('token');
-      const res = await axios.get(
-        `http://localhost:8000/api/case-reference/download?job_id=${jobId}`,
-        { 
-          responseType: 'blob',
-          headers: { 'Authorization': `Bearer ${token}` }
-        }
-      );
+      const res = await api.get(`/case-reference/download?job_id=${jobId}`, { 
+        responseType: 'blob' 
+      });
 
       const blob = new Blob([res.data], { type: 'application/xml' });
       const url = window.URL.createObjectURL(blob);

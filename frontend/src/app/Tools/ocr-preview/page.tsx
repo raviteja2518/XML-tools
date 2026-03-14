@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import api from '@/utils/api';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -31,12 +29,7 @@ export default function OCRDocBookPreview() {
     setStatus('Uploading file...');
 
     try {
-      const token = Cookies.get('token');
-      const res = await axios.post(
-        'http://localhost:8000/api/ocr-docbook/upload',
-        fd,
-        { headers: { 'Authorization': `Bearer ${token}` } }
-      );
+      const res = await api.post('/ocr-docbook/upload', fd);
 
       setJobId(res.data.job_id);
       setTotalPages(res.data.total_pages || 1);
@@ -67,14 +60,9 @@ export default function OCRDocBookPreview() {
     try {
       setCurrentPage(page);
 
-      const token = Cookies.get('token');
-      const res = await axios.get(
-        'http://localhost:8000/api/ocr-docbook/page-preview',
-        { 
-          params: { job_id: jid, page },
-          headers: { 'Authorization': `Bearer ${token}` }
-        }
-      );
+      const res = await api.get('/ocr-docbook/page-preview', { 
+        params: { job_id: jid, page }
+      });
 
       setXmlPreview(res.data.xml);
     } catch {
@@ -85,15 +73,10 @@ export default function OCRDocBookPreview() {
   /* ================= DOWNLOAD WORD FILE ================= */
   const downloadWord = async () => {
     try {
-      const token = Cookies.get('token');
-      const res = await axios.get(
-        'http://localhost:8000/api/ocr-docbook/download',
-        {
-          params: { job_id: jobId },
-          responseType: 'blob',
-          headers: { 'Authorization': `Bearer ${token}` }
-        }
-      );
+      const res = await api.get('/ocr-docbook/download', {
+        params: { job_id: jobId },
+        responseType: 'blob'
+      });
 
       // ✅ Correct MIME type for Word
       const blob = new Blob(

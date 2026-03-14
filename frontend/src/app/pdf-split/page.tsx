@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import Cookies from 'js-cookie';
+import api from '@/utils/api';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function PdfSplitPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -34,25 +35,12 @@ export default function PdfSplitPage() {
       formData.append('file', file);
       formData.append('ranges', ranges);
 
-      const token = Cookies.get('token');
-      const res = await fetch('http://127.0.0.1:8000/pdf-split', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData,
-      });
-
-      if (!res.ok) {
-        throw new Error('Split failed');
-      }
-
-      const data = await res.json();
-      const jid = data.job_id;
+      const res = await api.post('/pdf-split', formData);
+      const jid = res.data.job_id;
 
       setJobId(jid);
       listenProgress(jid);
-      setDownloadUrl(`http://127.0.0.1:8000/download-split/${jid}`);
+      setDownloadUrl(`${API_BASE}/download-split/${jid}`);
     } catch (e) {
       alert('PDF split failed');
       setLoading(false);
@@ -64,7 +52,7 @@ export default function PdfSplitPage() {
   // =============================
   const listenProgress = (jid: string) => {
     const es = new EventSource(
-      `http://127.0.0.1:8000/events/pdf-split-progress/${jid}`
+      `${API_BASE}/events/pdf-split-progress/${jid}`
     );
 
     eventSourceRef.current = es;

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import axios from 'axios';
+import api from '@/utils/api';
 
-const API = 'http://127.0.0.1:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function PdfToWord() {
 
@@ -33,14 +33,14 @@ export default function PdfToWord() {
 
     try {
 
-      const res = await axios.post(
-        `${API}/tools/pdf-to-word`,
+      const res = await api.post(
+        `/tools/pdf-to-word`,
         fd
       );
 
       const jobId = res.data.job_id;
 
-      setDownloadUrl(`${API}${res.data.download_url}`);
+      setDownloadUrl(`${API_BASE}${res.data.download_url}`);
 
       listenProgress(jobId);
 
@@ -59,7 +59,7 @@ export default function PdfToWord() {
   const listenProgress = (jobId: string) => {
 
     const es = new EventSource(
-      `${API}/events/pdf-to-word-progress/${jobId}`
+      `${API_BASE}/events/pdf-to-word-progress/${jobId}`
     );
 
     eventSourceRef.current = es;

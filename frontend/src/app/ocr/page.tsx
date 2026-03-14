@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import Cookies from 'js-cookie';
+import api from '@/utils/api';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function OCRPage() {
   const [files, setFiles] = useState<File[]>([]);
@@ -21,19 +22,15 @@ export default function OCRPage() {
     const fd = new FormData();
     files.forEach(f => fd.append('files', f));
 
-    const token = Cookies.get('token');
-    const res = await fetch('http://127.0.0.1:8000/ocr/process', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      },
-      body: fd,
-    });
-
-    const data = await res.json();
-    setDownload(`http://127.0.0.1:8000${data.download_url}`);
-    setLoading(false);
-    setDone(true);
+    try {
+      const res = await api.post('/ocr/process', fd);
+      setDownload(`${API_BASE}${res.data.download_url}`);
+      setLoading(false);
+      setDone(true);
+    } catch (err) {
+      alert('OCR failed');
+      setLoading(false);
+    }
   };
 
   const reset = () => {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-import Cookies from 'js-cookie';
+import api from '@/utils/api';
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace('/api', '');
 
 type Step = 1 | 2 | 3;
 
@@ -44,16 +44,13 @@ export default function BlackVaveIndexTool() {
     files.forEach(f => fd.append('files', f));
 
     try {
-      const token = Cookies.get('token');
-      const res = await axios.post('http://localhost:8000/api/docxmlindex/upload-pages', fd, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const res = await api.post('/docxmlindex/upload-pages', fd);
       setJobId(res.data.job_id);
       setPages(res.data.pages);
       setStep(2);
     } catch (err) {
       console.error("Upload failed", err);
-      alert("Backend connected kaadu. Please check if FastAPI is running on port 8000.");
+      alert("Processing failed. Please check if your account is active.");
     }
   };
 
@@ -89,16 +86,13 @@ export default function BlackVaveIndexTool() {
     
     setIsSaving(true);
     try {
-      const token = Cookies.get('token');
-      await axios.post('http://localhost:8000/api/docxmlindex/save-selection', {
+      await api.post('/docxmlindex/save-selection', {
         job_id: jobId,
         file: pages[currentPage].file,
         x: Math.round(rect.x),
         y: Math.round(rect.y),
         width: Math.round(rect.w),
         height: Math.round(rect.h),
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
       });
       alert(`Column saved for Page ${currentPage + 1}! Select next column or click Generate.`);
       setRect({ x: 0, y: 0, w: 0, h: 0 });
@@ -112,11 +106,8 @@ export default function BlackVaveIndexTool() {
   // 4. GENERATE
   const generateXML = async () => {
     try {
-      const token = Cookies.get('token');
-      await axios.post(`http://localhost:8000/api/docxmlindex/generate-xml?job_id=${jobId}`, {}, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      window.location.href = `http://localhost:8000/api/docxmlindex/download?job_id=${jobId}`;
+      await api.post(`/docxmlindex/generate-xml?job_id=${jobId}`, {});
+      window.location.href = `${API_BASE}/api/docxmlindex/download?job_id=${jobId}`;
     } catch (err) {
       alert("XML generation failed.");
     }
@@ -173,7 +164,7 @@ export default function BlackVaveIndexTool() {
             >
               <img
                 ref={imgRef}
-                src={`http://localhost:8000${pages[currentPage]?.preview}`}
+                src={`${API_BASE}${pages[currentPage]?.preview}`}
                 alt="Index Page"
                 crossOrigin="anonymous"
                 draggable={false}

@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import api from '@/utils/api';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function PdfToTiffPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -26,16 +28,11 @@ export default function PdfToTiffPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await fetch('http://127.0.0.1:8000/pdf-to-tiff', {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await api.post('/pdf-to-tiff', formData);
+      const jobId = res.data.job_id;
 
-      if (!res.ok) throw new Error('Conversion failed');
-
-      const data = await res.json();
-      listenProgress(data.job_id);
-      setDownloadUrl(`http://127.0.0.1:8000/download-tiff/${data.job_id}`);
+      listenProgress(jobId);
+      setDownloadUrl(`${API_BASE}/download-tiff/${jobId}`);
     } catch (err) {
       console.error(err);
       alert('PDF to TIFF conversion failed');
@@ -46,7 +43,7 @@ export default function PdfToTiffPage() {
   /* ================= SSE PROGRESS ================= */
   const listenProgress = (jobId: string) => {
     const es = new EventSource(
-      `http://127.0.0.1:8000/events/pdf-to-tiff-progress/${jobId}`
+      `${API_BASE}/events/pdf-to-tiff-progress/${jobId}`
     );
 
     eventSourceRef.current = es;
