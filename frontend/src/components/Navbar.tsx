@@ -23,46 +23,45 @@ export default function Navbar() {
       <nav style={styles.navbar}>
         <div style={styles.logo}>XML Tools</div>
 
+        {!isMobile && user && (
+          <ul style={styles.links}>
+            <NavLinks />
+          </ul>
+        )}
+
         {!isMobile && (
-          <>
-            <ul style={styles.links}>
-              <NavLinks />
-            </ul>
-
-            <div style={styles.actions}>
-              {!loading && (
-                <>
-                  {!user ? (
-                    <Link href="/login">
-                      <button style={styles.login}>Login</button>
-                    </Link>
-                  ) : (
-                    <>
-                      {user.role === 'admin' && (
-                        <Link href="/admin">
-                          <button style={styles.dashboard}>Admin Panel</button>
-                        </Link>
-                      )}
-
-                      {/* Profile Link */}
-                      <Link
-                        href="/profile"
-                        className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-medium hover:bg-white/10 transition-all text-gray-300 hover:text-white"
-                      >
-                        <User className="w-3.5 h-3.5" />
-                        Profile
+          <div style={styles.actions}>
+            {!loading && (
+              <>
+                {!user ? (
+                  <Link href="/login">
+                    <button style={styles.login}>Login</button>
+                  </Link>
+                ) : (
+                  <>
+                    {user.role === 'admin' && (
+                      <Link href="/admin">
+                        <button style={styles.dashboard}>Admin Panel</button>
                       </Link>
-                      
-                      <button style={styles.login} onClick={logout}>
-                        Logout ({user.name})
-                      </button>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
+                    )}
 
-          </>
+                    {/* Profile Link */}
+                    <Link
+                      href="/profile"
+                      className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-medium hover:bg-white/10 transition-all text-gray-300 hover:text-white"
+                    >
+                      <User className="w-3.5 h-3.5" />
+                      Profile
+                    </Link>
+                    
+                    <button style={styles.login} onClick={logout}>
+                      Logout ({user.name})
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+          </div>
         )}
 
         {isMobile && (
@@ -74,9 +73,11 @@ export default function Navbar() {
 
       {isMobile && open && (
         <div style={styles.mobileMenu}>
-          <ul style={styles.mobileLinks}>
-            <NavLinks onClick={() => setOpen(false)} />
-          </ul>
+          {user && (
+            <ul style={styles.mobileLinks}>
+              <NavLinks onClick={() => setOpen(false)} />
+            </ul>
+          )}
 
           <div style={styles.mobileActions}>
             {!loading && (
@@ -123,15 +124,22 @@ export default function Navbar() {
 
 /* ---------- LINKS ---------- */
 function NavLinks({ onClick }: { onClick?: () => void }) {
+  const commonLinkStyle = {
+    color: '#fff',
+    textDecoration: 'none',
+    transition: 'color 0.2s',
+    cursor: 'pointer',
+  };
+
   return (
     <>
-      <li><Link href="/pdf-to-xml" onClick={onClick}>PDF → XML</Link></li>
-      <li><Link href="/ocr" onClick={onClick}>OCR</Link></li>
-      <li><Link href="/pdf-to-tiff" onClick={onClick}>PDF → TIFF</Link></li>
-      <li><Link href="/pdf-split" onClick={onClick}>PDF Split</Link></li>
-      <li><Link href="/epub2" onClick={onClick}>EPUB2</Link></li>
-      <li><Link href="/epub3" onClick={onClick}>EPUB3</Link></li>
-      <li><Link href="/Tools" onClick={onClick}>Tools</Link></li>
+      <li><Link href="/pdf-to-xml" onClick={onClick} style={commonLinkStyle}>PDF → XML</Link></li>
+      <li><Link href="/ocr" onClick={onClick} style={commonLinkStyle}>OCR</Link></li>
+      <li><Link href="/pdf-to-tiff" onClick={onClick} style={commonLinkStyle}>PDF → TIFF</Link></li>
+      <li><Link href="/pdf-split" onClick={onClick} style={commonLinkStyle}>PDF Split</Link></li>
+      <li><Link href="/epub2" onClick={onClick} style={commonLinkStyle}>EPUB2</Link></li>
+      <li><Link href="/epub3" onClick={onClick} style={commonLinkStyle}>EPUB3</Link></li>
+      <li><Link href="/Tools" onClick={onClick} style={commonLinkStyle}>Tools</Link></li>
     </>
   );
 }
