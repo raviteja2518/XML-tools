@@ -27,11 +27,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({ currentAvatar }) => {
     formData.append("file", file);
 
     try {
-      const response = await api.post("/profile/upload-picture", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await api.post("/profile/upload-picture", formData);
       updateUser(response.data);
     } catch (error) {
       console.error("Upload failed:", error);
