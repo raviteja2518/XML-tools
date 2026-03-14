@@ -4,12 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/utils/api";
 import Navbar from "@/components/Navbar";
-import AvatarUpload from "@/components/AvatarUpload";
-import { User, Mail, Phone, Calendar, ShieldCheck, Zap, AlertCircle, Loader2 } from "lucide-react";
+import { User, Mail, Phone, ShieldCheck, Zap, AlertCircle, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const ProfilePage = () => {
-  const { user, updateUser, token, logout } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -54,7 +53,9 @@ const ProfilePage = () => {
         <div className="space-y-8">
           {/* Header */}
           <div className="flex flex-col md:flex-row items-center gap-8 bg-gray-900/50 p-8 rounded-3xl border border-white/5">
-            <AvatarUpload currentAvatar={user.profile_picture} />
+            <div className="w-24 h-24 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <User className="w-10 h-10 text-indigo-400" />
+            </div>
             <div className="text-center md:text-left">
               <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
                 {user.name}

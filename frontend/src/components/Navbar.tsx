@@ -49,15 +49,7 @@ export default function Navbar() {
                         href="/profile"
                         className="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-full text-xs font-medium hover:bg-white/10 transition-all text-gray-300 hover:text-white"
                       >
-                        {user?.profile_picture ? (
-                          <img
-                            src={`${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "")}${user.profile_picture}`}
-                            alt="P"
-                            className="w-4 h-4 rounded-full object-cover shadow-sm"
-                          />
-                        ) : (
-                          <User className="w-3.5 h-3.5" />
-                        )}
+                        <User className="w-3.5 h-3.5" />
                         Profile
                       </Link>
                       
@@ -110,15 +102,7 @@ export default function Navbar() {
                       className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium hover:bg-white/10 transition-all text-gray-300 hover:text-white"
                       onClick={() => setOpen(false)}
                     >
-                      {user?.profile_picture ? (
-                        <img
-                          src={`${process.env.NEXT_PUBLIC_API_URL?.replace("/api", "")}${user.profile_picture}`}
-                          alt="P"
-                          className="w-5 h-5 rounded-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-4 h-4" />
-                      )}
+                      <User className="w-4 h-4" />
                       Profile
                     </Link>
 

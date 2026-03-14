@@ -33,30 +33,6 @@ async def update_profile(
     db.refresh(current_user)
     return current_user
 
-@router.post("/upload-picture", response_model=UserResponse)
-async def upload_profile_picture(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
-):
-    # Validate file type
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image")
-
-    # Generate unique filename
-    file_extension = os.path.splitext(file.filename)[1]
-    filename = f"{uuid.uuid4()}{file_extension}"
-    file_path = os.path.join(UPLOAD_DIR, filename)
-
-    # Save file
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    # Update user record
-    # If using a CDN or external storage, this would be a full URL.
-    # For now, we store the path relative to the root or a static mount.
-    current_user.profile_picture = f"/uploads/profile_pictures/{filename}"
-    
     db.add(current_user)
     db.commit()
     db.refresh(current_user)
