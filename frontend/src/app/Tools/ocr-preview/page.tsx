@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef } from 'react';
 import api from '@/utils/api';
 
 type Step = 1 | 2 | 3 | 4;
