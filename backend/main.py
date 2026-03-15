@@ -114,12 +114,17 @@ app = FastAPI(title="Black Vave Multi-Tool API", lifespan=lifespan)
 
 # ================= CORS =================
 
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        os.getenv("FRONTEND_URL", "*") 
+        "http://localhost:3001",
+        frontend_url,
+        "https://xml-tools.vercel.app"
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
