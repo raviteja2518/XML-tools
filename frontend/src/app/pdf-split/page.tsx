@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import api from '@/utils/api';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/api$/, '') + '/api';
 
 export default function PdfSplitPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -42,8 +42,9 @@ export default function PdfSplitPage() {
       setJobId(jid);
       listenProgress(jid);
       setDownloadUrl(`${API_BASE}/download-split/${jid}`);
-    } catch (e) {
-      alert('PDF split failed');
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || "PDF split failed";
+      alert(msg);
       setLoading(false);
     }
   };

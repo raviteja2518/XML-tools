@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import api from '@/utils/api';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/api$/, '') + '/api';
 
 export default function PdfToTiffPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -34,9 +34,10 @@ export default function PdfToTiffPage() {
 
       listenProgress(jobId);
       setDownloadUrl(`${API_BASE}/download-tiff/${jobId}`);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('PDF to TIFF conversion failed');
+      const msg = err.response?.data?.detail || "PDF to TIFF conversion failed";
+      alert(msg);
       setLoading(false);
     }
   };

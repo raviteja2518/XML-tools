@@ -42,10 +42,7 @@ export default function CasePdfToXmlPage() {
     } catch (err: any) {
       setLoading(false);
       setStep(1);
-
-      const msg =
-        err?.response?.data?.detail ||
-        'Processing failed (check backend logs)';
+      const msg = err.response?.data?.detail || "Processing failed";
       alert(msg);
     }
   };

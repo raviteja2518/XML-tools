@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+
 export default function JatsRefPage() {
 
   const [file,setFile] = useState<File | null>(null)
@@ -23,7 +25,7 @@ export default function JatsRefPage() {
     try{
 
       const res = await fetch(
-        "http://localhost:8000/api/jats/upload",
+        `${API_BASE}/api/jats/upload`,
         {
           method:"POST",
           body:formData
@@ -33,7 +35,7 @@ export default function JatsRefPage() {
       const data = await res.json()
 
       setDownloadUrl(
-        `http://localhost:8000/api/jats/download/${data.job_id}`
+        `${API_BASE}/api/jats/download/${data.job_id}`
       )
 
     }catch(err){

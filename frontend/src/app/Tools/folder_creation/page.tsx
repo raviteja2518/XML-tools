@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+
 export default function FolderCreationPage() {
   const [projectName, setProjectName] = useState('');
   const [structure, setStructure] = useState('');
@@ -16,7 +19,7 @@ export default function FolderCreationPage() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/folder_creator', {
+      const res = await fetch(`${API_BASE}/folder_creator`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

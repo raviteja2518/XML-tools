@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
 
 const TAGS = ['p', 'h2', 'h3'];
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+
 
 export default function XmlEditor() {
   const [jobId, setJobId] = useState('');
@@ -12,7 +14,7 @@ export default function XmlEditor() {
 
   useEffect(() => {
     const token = Cookies.get('token');
-    fetch(`http://127.0.0.1:8000/xml/job/${jobId}/page/${page}`, {
+    fetch(`${API_BASE}/xml/job/${jobId}/page/${page}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(r => r.json())
@@ -22,7 +24,7 @@ export default function XmlEditor() {
   const applyTag = async (tag: string) => {
     if (!selection) return;
     const token = Cookies.get('token');
-    await fetch(`http://127.0.0.1:8000/xml/job/${jobId}/annotate`, {
+    await fetch(`${API_BASE}/xml/job/${jobId}/annotate`, {
       method:'POST',
       headers:{
         'Content-Type':'application/json',
@@ -67,7 +69,7 @@ export default function XmlEditor() {
       {/* Generate */}
       <button onClick={()=>{
         const token = Cookies.get('token');
-        fetch(`http://127.0.0.1:8000/xml/job/${jobId}/generate`, {
+        fetch(`${API_BASE}/xml/job/${jobId}/generate`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
       }}>

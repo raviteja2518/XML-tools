@@ -3,6 +3,9 @@
 import { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 
+
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+
 export default function ImageCropTool() {
   const [previewUrl, setPreviewUrl] = useState('');
   const [jobId, setJobId] = useState('');
@@ -19,13 +22,13 @@ export default function ImageCropTool() {
     const fd = new FormData();
     fd.append('file', file);
 
-    const res = await fetch('http://127.0.0.1:8000/tools/image-crop/preview', {
+    const res = await fetch(`${API_BASE}/tools/image-crop/preview`, {
       method: 'POST',
       body: fd,
     });
 
     const data = await res.json();
-    setPreviewUrl('http://127.0.0.1:8000' + data.preview_url);
+    setPreviewUrl(API_BASE + data.preview_url);
     setJobId(data.job_id);
   };
 
@@ -37,13 +40,13 @@ export default function ImageCropTool() {
     fd.append('width', Math.round(croppedArea.width).toString());
     fd.append('height', Math.round(croppedArea.height).toString());
 
-    const res = await fetch('http://127.0.0.1:8000/tools/image-crop', {
+    const res = await fetch(`${API_BASE}/tools/image-crop`, {
       method: 'POST',
       body: fd,
     });
 
     const data = await res.json();
-    setDownloadUrl('http://127.0.0.1:8000' + data.download_url);
+    setDownloadUrl(API_BASE + data.download_url);
   };
 
   return (

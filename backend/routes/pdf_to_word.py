@@ -1,7 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import FileResponse, StreamingResponse
-from pdf2docx import Converter
-import uuid, os, threading, time, asyncio, json
+import uuid, os, threading, time, asyncio, json, traceback
 
 router = APIRouter()
 
@@ -15,34 +14,36 @@ TTL_SECONDS = 1800
 
 progress_store = {}
 job_status = {}
+job_error = {}
 job_created_at = {}
 
 
 def convert_worker(job_id: str, pdf_path: str):
-
     try:
+        from pdf2docx import Converter
 
         progress_store[job_id] = 10
 
         output_path = os.path.join(CONVERT_DIR, f"{job_id}.docx")
 
         cv = Converter(pdf_path)
-
         cv.convert(output_path)
-
         cv.close()
 
         progress_store[job_id] = 100
-
         job_status[job_id] = "completed"
 
-        os.remove(pdf_path)
+        # clean up input pdf
+        if os.path.exists(pdf_path):
+            os.remove(pdf_path)
 
     except Exception as e:
-
-        print("ERROR:", e)
-
+        err_msg = f"{type(e).__name__}: {str(e)}"
+        print("PDF-TO-WORD ERROR:", err_msg)
+        print(traceback.format_exc())
         job_status[job_id] = "failed"
+        job_error[job_id] = err_msg
+        progress_store[job_id] = -1  # sentinel value = failed
 
 
 @router.post("/tools/pdf-to-word")
@@ -55,16 +56,17 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     pdf_path = os.path.join(CONVERT_DIR, f"{job_id}.pdf")
 
-    with open(pdf_path,"wb") as f:
+    with open(pdf_path, "wb") as f:
         f.write(await file.read())
 
     progress_store[job_id] = 1
     job_status[job_id] = "processing"
+    job_error[job_id] = None
     job_created_at[job_id] = time.time()
 
     threading.Thread(
         target=convert_worker,
-        args=(job_id,pdf_path),
+        args=(job_id, pdf_path),
         daemon=True
     ).start()
 
@@ -79,16 +81,21 @@ async def progress_events(job_id: str):
 
     async def event_generator():
 
-        last = -1
+        last = -2
 
         while True:
 
-            progress = progress_store.get(job_id,0)
+            progress = progress_store.get(job_id, 0)
+            status = job_status.get(job_id, "processing")
+
+            # Job failed — send error event and stop
+            if progress == -1 or status == "failed":
+                error_msg = job_error.get(job_id, "Conversion failed on server")
+                yield f"data: {json.dumps({'progress': -1, 'status': 'failed', 'error': error_msg})}\n\n"
+                break
 
             if progress != last:
-
-                yield f"data: {json.dumps({'progress':progress})}\n\n"
-
+                yield f"data: {json.dumps({'progress': progress, 'status': status})}\n\n"
                 last = progress
 
             if progress >= 100:
@@ -103,14 +110,19 @@ async def progress_events(job_id: str):
 
 
 @router.get("/tools/download/{job_id}")
-def download(job_id:str, background_tasks: BackgroundTasks):
+def download(job_id: str, background_tasks: BackgroundTasks):
+
+    # Check if job failed
+    if job_status.get(job_id) == "failed":
+        err = job_error.get(job_id, "Conversion failed")
+        raise HTTPException(500, f"Conversion failed: {err}")
 
     file_path = os.path.join(CONVERT_DIR, f"{job_id}.docx")
 
     if not os.path.exists(file_path):
-        raise HTTPException(404,"File not found")
+        raise HTTPException(404, "File not found or already downloaded")
 
-    background_tasks.add_task(cleanup,job_id)
+    background_tasks.add_task(cleanup, job_id)
 
     return FileResponse(
         file_path,
@@ -124,14 +136,16 @@ def cleanup(job_id):
     time.sleep(2)
 
     files = [
-        os.path.join(CONVERT_DIR,f"{job_id}.docx"),
-        os.path.join(CONVERT_DIR,f"{job_id}.pdf")
+        os.path.join(CONVERT_DIR, f"{job_id}.docx"),
+        os.path.join(CONVERT_DIR, f"{job_id}.pdf")
     ]
 
     for f in files:
         if os.path.exists(f):
             os.remove(f)
 
-    progress_store.pop(job_id,None)
-    job_status.pop(job_id,None)
-    job_created_at.pop(job_id,None)
+    progress_store.pop(job_id, None)
+    job_status.pop(job_id, None)
+    job_error.pop(job_id, None)
+    job_created_at.pop(job_id, None)
+

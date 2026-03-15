@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 
-const API = "http://127.0.0.1:8000";
+const API = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
 
 export default function PdfSplitByRangePage() {
   const [file, setFile] = useState<File | null>(null);

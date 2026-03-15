@@ -152,33 +152,33 @@ app.include_router(profile_router)
 # Protect existing tools using dependencies
 tool_deps = [Depends(get_current_active_user)]
 
-app.include_router(pdf_to_tiff.router, dependencies=tool_deps)
-app.include_router(pdf_split.router, dependencies=tool_deps)
-app.include_router(ocr_preview.router, dependencies=tool_deps)
+app.include_router(pdf_to_tiff.router, prefix="/api", dependencies=tool_deps)
+app.include_router(pdf_split.router, prefix="/api", dependencies=tool_deps)
+app.include_router(ocr_preview.router, prefix="/api", dependencies=tool_deps)
 
 app.include_router(ln_xml_router)
 app.include_router(xml_job_router)
 app.include_router(folder_router)
 
-app.include_router(ln_xml_manual.router)
-app.include_router(image_crop.router)
-app.include_router(ws_router)
+app.include_router(ln_xml_manual.router, prefix="/api")
+app.include_router(image_crop.router, prefix="/api")
+app.include_router(ws_router, prefix="/api")
 
-app.include_router(pdf_to_xml.router, dependencies=tool_deps)
-app.include_router(bits_router, dependencies=tool_deps)
-app.include_router(split_pdf.router, dependencies=tool_deps)
-app.include_router(bits_meta_router, dependencies=tool_deps)
+app.include_router(pdf_to_xml.router, prefix="/api", dependencies=tool_deps)
+app.include_router(bits_router, prefix="/api", dependencies=tool_deps)
+app.include_router(split_pdf.router, prefix="/api", dependencies=tool_deps)
+app.include_router(bits_meta_router, prefix="/api", dependencies=tool_deps)
 
 app.include_router(xml_ref_router, prefix="/api/xml-ref", dependencies=tool_deps)
 
-app.include_router(case_reference_router, dependencies=tool_deps)
-app.include_router(build_router, dependencies=tool_deps)
+app.include_router(case_reference_router, prefix="/api", dependencies=tool_deps)
+app.include_router(build_router, prefix="/api", dependencies=tool_deps)
 
-app.include_router(ocr_docbook_router, dependencies=tool_deps)
-app.include_router(docxmlindex_router, dependencies=tool_deps)
-app.include_router(pdf_word_router, dependencies=tool_deps)
+app.include_router(ocr_docbook_router, prefix="/api", dependencies=tool_deps)
+app.include_router(docxmlindex_router, prefix="/api", dependencies=tool_deps)
+app.include_router(pdf_word_router, prefix="/api", dependencies=tool_deps)
 # Tail reference parser
-app.include_router(tail_router, dependencies=tool_deps)
+app.include_router(tail_router, prefix="/api", dependencies=tool_deps)
 
 # ================= ROOT HEALTH CHECK =================
 

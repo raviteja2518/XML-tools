@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react';
 import Cookies from 'js-cookie';
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+
 export default function PdfToWordPage() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ export default function PdfToWordPage() {
       formData.append('file', file);
 
       const token = Cookies.get('token');
-      const res = await fetch('http://127.0.0.1:8000/pdf-to-word', {
+      const res = await fetch(`${API_BASE}/api/tools/pdf-to-word`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -41,7 +43,7 @@ export default function PdfToWordPage() {
 
       // ✅ backend returns: { download_id: "uuid" }
       setDownloadUrl(
-        `http://127.0.0.1:8000/download-word/${data.download_id}`
+        `${API_BASE}/api/tools/download/${data.job_id}`
       );
     } catch (error) {
       console.error(error);

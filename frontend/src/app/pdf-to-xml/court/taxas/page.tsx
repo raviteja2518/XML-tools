@@ -175,6 +175,8 @@ const TAGS = [
 
 /* ================= COMPONENT ================= */
 
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+
 export default function LnXmlEditor() {
   const [file, setFile] = useState<File | null>(null);
   const [jobId, setJobId] = useState('');
@@ -196,7 +198,7 @@ export default function LnXmlEditor() {
     fd.append('file', file);
 
     const token = Cookies.get('token');
-    const res = await fetch('http://127.0.0.1:8000/lnxml/upload', {
+    const res = await fetch(`${API_BASE}/lnxml/upload`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: fd,
@@ -244,7 +246,7 @@ export default function LnXmlEditor() {
 
     // ✅ save history BEFORE change
     const token = Cookies.get('token');
-    await fetch('http://127.0.0.1:8000/lnxml/tag', {
+    await fetch(`${API_BASE}/lnxml/tag`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -285,7 +287,7 @@ export default function LnXmlEditor() {
 
   const generate = async () => {
   const token = Cookies.get('token');
-  const res = await fetch('http://127.0.0.1:8000/lnxml/generate', {
+  const res = await fetch(`${API_BASE}/lnxml/generate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -297,7 +299,7 @@ export default function LnXmlEditor() {
   const d = await res.json();
 
   // 🔽 trigger download
-  window.open('http://127.0.0.1:8000' + d.download, '_blank');
+  window.open(API_BASE + d.download, '_blank');
 
   // 🔥 IMPORTANT: reset UI AFTER download trigger
   setTimeout(() => {

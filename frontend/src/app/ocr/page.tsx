@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import api from '@/utils/api';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/api$/, '') + '/api';
 
 export default function OCRPage() {
   const [files, setFiles] = useState<File[]>([]);
@@ -28,8 +28,9 @@ export default function OCRPage() {
       setDownload(`${API_BASE}${res.data.download_url}`);
       setLoading(false);
       setDone(true);
-    } catch (err) {
-      alert('OCR failed');
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || "OCR failed";
+      alert(msg);
       setLoading(false);
     }
   };

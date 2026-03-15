@@ -53,7 +53,7 @@ export default function Navbar() {
                       <User className="w-3.5 h-3.5" />
                       Profile
                     </Link>
-                    
+
                     <button style={styles.login} onClick={logout}>
                       Logout ({user.name})
                     </button>

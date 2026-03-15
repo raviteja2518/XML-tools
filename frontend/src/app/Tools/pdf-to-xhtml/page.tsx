@@ -115,7 +115,8 @@ export default function PdfToXhtmlPage() {
       formData.append("type", sub);
       formData.append("file", file);
 
-      const res = await fetch("http://localhost:8000/build", {
+      const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+      const res = await fetch(`${API_BASE}/build`, {
         method: "POST",
         body: formData,
       });
@@ -140,7 +141,8 @@ export default function PdfToXhtmlPage() {
   const downloadFile = () => {
     if (!fileId || !fileName) return;
 
-    const url = `http://localhost:8000/download/${fileId}/${fileName}`;
+    const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+    const url = `${API_BASE}/download/${fileId}/${fileName}`;
     const a = document.createElement("a");
     a.href = url;
     a.download = fileName;

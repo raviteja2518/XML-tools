@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import api from '@/utils/api';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/api$/, '') + '/api';
 
 export default function PdfToWord() {
 
@@ -44,11 +44,10 @@ export default function PdfToWord() {
 
       listenProgress(jobId);
 
-    } catch {
-
-      alert("Conversion failed");
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || "Conversion failed";
+      alert(msg);
       setLoading(false);
-
     }
 
   };
@@ -68,15 +67,27 @@ export default function PdfToWord() {
 
       const data = JSON.parse(e.data);
 
+      // Job failed on server
+      if (data.progress === -1 || data.status === 'failed') {
+        es.close();
+        setLoading(false);
+        alert(`Conversion failed: ${data.error || 'Unknown server error'}`);
+        return;
+      }
+
       setProgress(data.progress);
 
       if (data.progress >= 100) {
-
         es.close();
         setLoading(false);
-
       }
 
+    };
+
+    es.onerror = () => {
+      es.close();
+      setLoading(false);
+      alert('Connection to server lost. Please try again.');
     };
 
   };

@@ -21,13 +21,14 @@ export default function ManualLnXmlUploadPage() {
       const fd = new FormData();
       fd.append('file', file);
 
-      const res = await fetch('http://127.0.0.1:8000/ln-xml/manual-upload', {
+      const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api').replace(/\/api$/, '');
+      const res = await fetch(`${API_BASE}/ln-xml/manual-upload`, {
         method: 'POST',
         body: fd,
       });
 
       const data = await res.json();
-      setDownloadUrl(`http://127.0.0.1:8000${data.download_url}`);
+      setDownloadUrl(`${API_BASE}${data.download_url}`);
 
       // ✅ reset upload after success
       setFile(null);

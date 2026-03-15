@@ -51,7 +51,8 @@ export default function OCRDocBookPreview() {
       }, 2000);
 
     } catch (err: any) {
-      alert(err?.response?.data?.detail || 'OCR processing failed');
+      const msg = err.response?.data?.detail || "OCR processing failed";
+      alert(msg);
       setStep(1);
     }
   };
