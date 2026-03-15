@@ -49,6 +49,32 @@ async def cleanup_old_files():
 # ================= DB INIT =================
 models.Base.metadata.create_all(bind=engine)
 
+# Safely upgrade existing tables since create_all doesn't add missing columns
+from sqlalchemy import text
+def upgrade_schema():
+    with engine.begin() as conn:
+        try:
+            if engine.dialect.name == "postgresql":
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS requested_role VARCHAR DEFAULT 'employee';"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS has_paid INTEGER DEFAULT 0;"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_picture VARCHAR;"))
+                conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_expiry TIMESTAMP;"))
+            elif engine.dialect.name == "sqlite":
+                for col_def in [
+                    "requested_role VARCHAR DEFAULT 'employee'",
+                    "has_paid INTEGER DEFAULT 0",
+                    "profile_picture VARCHAR",
+                    "subscription_expiry TIMESTAMP"
+                ]:
+                    try:
+                        conn.execute(text(f"ALTER TABLE users ADD COLUMN {col_def};"))
+                    except Exception:
+                        pass
+        except Exception as e:
+            print(f"Warning during schema upgrade: {e}")
+
+upgrade_schema()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Start the background cleanup task
