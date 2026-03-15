@@ -27,8 +27,10 @@ export default function LoginPage() {
     } catch (err: any) {
       if (err.response?.status === 403) {
         setError("Your account is pending admin approval.");
-      } else {
+      } else if (err.response?.status === 401) {
         setError("Invalid email or password.");
+      } else {
+        setError(err.response?.data?.detail || err.message || "Network Error: Check API URL configuration.");
       }
     } finally {
       setIsLoading(false);
